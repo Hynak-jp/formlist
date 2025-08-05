@@ -4,7 +4,7 @@ import FormCard from '@/components/FormCard';
 import UserInfo from '@/components/UserInfo';
 
 export default function FormPage() {
-  const cookieStore = cookies();
+  const cookieStore = cookies() as ReturnType<typeof cookies>; // 💡これが重要
   const lineId = cookieStore.get('lineId')?.value ?? null;
 
   console.log('🟢 lineId from cookie:', lineId);
