@@ -7,7 +7,9 @@ export default async function FormPage() {
   const cookieStore = await cookies(); // ← ここで型エラー回避
   const lineId = cookieStore.get('lineId')?.value ?? null;
 
-  if (!lineId) {
+  console.log('🟢 lineId from cookie:', lineId); // ← これ追加
+
+  if (lineId) {
     redirect('/login');
   }
 
