@@ -17,7 +17,8 @@ export default function UserInfo({ onReady }: Props) {
         await liff.init({ liffId: process.env.NEXT_PUBLIC_LIFF_ID! });
 
         if (!liff.isLoggedIn()) {
-          liff.login();
+          console.log('Not logged in: triggering liff.login()');
+          liff.login(); // ← ここが呼ばれれば遷移する
         } else {
           const profile = await liff.getProfile();
           const idToken = liff.getDecodedIDToken();
@@ -30,7 +31,7 @@ export default function UserInfo({ onReady }: Props) {
           setUser(userData);
           onReady(userData);
 
-          // 追加: fetchでCookieをサーバー側に保存
+          // ✅ Cookie保存APIを呼ぶ
           await fetch('/api/set-login-cookie', {
             method: 'POST',
             headers: {
@@ -50,7 +51,7 @@ export default function UserInfo({ onReady }: Props) {
       setUser(parsed);
       onReady(parsed);
     } else {
-      initLiff();
+      initLiff(); // ← ここが呼ばれないパターンがある
     }
   }, [onReady]);
 

@@ -24,6 +24,14 @@ export default function LoginPage() {
           };
 
           sessionStorage.setItem('lineUser', JSON.stringify(user));
+
+          // Cookie保存APIを呼ぶ
+          await fetch('/api/set-login-cookie', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ lineId: user.sub }),
+          });
+
           router.push('/form');
         }
       } catch (e) {
@@ -36,7 +44,9 @@ export default function LoginPage() {
   const handleLogin = () => {
     if (!agreed) return;
     setLoading(true);
-    liff.login();
+    if (!liff.isLoggedIn()) {
+      liff.login();
+    }
   };
 
   return (
@@ -47,8 +57,8 @@ export default function LoginPage() {
         <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} className="mr-2" />
         利用目的を理解し、同意します
       </label>
-      <button onClick={handleLogin} disabled={!agreed || loading} className="px-6 py-2 bg-green-500 text-white rounded disabled:bg-gray-400">
-        {loading ? 'ログイン中…' : 'LINEでログインする'}
+      <button onClick={handleLogin} disabled={!agreed || loading} className="px-4 py-2 bg-green-500 text-white rounded disabled:opacity-50">
+        LINEでログイン
       </button>
     </main>
   );
