@@ -4,7 +4,7 @@ import FormCard from '@/components/FormCard';
 import UserInfo from '@/components/UserInfo';
 
 export default async function FormPage() {
-  const cookieStore = await cookies();
+  const cookieStore = cookies();
   const lineId = cookieStore.get('lineId')?.value ?? null;
 
   console.log('🟢 lineId from cookie:', lineId);
