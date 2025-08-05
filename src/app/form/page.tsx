@@ -4,12 +4,12 @@ import FormCard from '@/components/FormCard';
 import UserInfo from '@/components/UserInfo';
 
 export default async function FormPage() {
-  const cookieStore = await cookies(); // ← ここで型エラー回避
+  const cookieStore = await cookies();
   const lineId = cookieStore.get('lineId')?.value ?? null;
 
-  console.log('🟢 lineId from cookie:', lineId); // ← これ追加
+  console.log('🟢 lineId from cookie:', lineId);
 
-  if (lineId) {
+  if (!lineId) {
     redirect('/login');
   }
 
@@ -42,13 +42,13 @@ export default async function FormPage() {
 
       <UserInfo
         onReady={() => {
-          // サーバー側でCookie取得済みのため、何もしなくてOK
+          // Cookieはサーバー側で取得済みのため何も不要
         }}
       />
 
       <div className="grid gap-6 md:grid-cols-2">
         {forms.map((form) => (
-          <FormCard key={form.title} title={form.title} description={form.description} baseUrl={form.baseUrl} lineId={lineId!} />
+          <FormCard key={form.title} title={form.title} description={form.description} baseUrl={form.baseUrl} lineId={lineId} />
         ))}
       </div>
     </main>
