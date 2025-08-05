@@ -44,6 +44,7 @@ export default function LoginPage() {
   const handleLogin = () => {
     if (!agreed) return;
     setLoading(true);
+    console.log('🔰 liff.login() 呼び出し直前'); // ← 追加
     if (!liff.isLoggedIn()) {
       liff.login();
     }

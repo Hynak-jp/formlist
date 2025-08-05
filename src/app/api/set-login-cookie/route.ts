@@ -1,11 +1,12 @@
-// ✅ 1. app/api/set-login-cookie/route.ts
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
   const { lineId } = await request.json();
 
-  cookies().set({
+  const cookieStore = cookies(); // ← 明示的に変数に代入
+
+  cookieStore.set({
     name: 'lineId',
     value: lineId,
     httpOnly: true,
