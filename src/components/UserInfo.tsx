@@ -8,7 +8,7 @@ type Props = {
   onReady?: (userData: { name: string; picture: string; sub: string }) => void;
 };
 
-export default function UserInfo() {
+export default function UserInfo({ onReady }: Props) {
   const [user, setUser] = useState<{ name: string; picture: string; sub: string } | null>(null);
 
   useEffect(() => {
