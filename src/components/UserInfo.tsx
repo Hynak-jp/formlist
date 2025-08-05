@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import liff from '@line/liff';
+import Image from 'next/image';
 
 type Props = {
   onReady: (userData: { name: string; picture: string; sub: string }) => void;
@@ -55,7 +56,7 @@ export default function UserInfo({ onReady }: Props) {
   return (
     <div className="mb-6 p-4 border rounded shadow-sm bg-white">
       <div className="flex items-center gap-4 mb-2">
-        <img src={user.picture} alt="プロフィール画像" className="w-16 h-16 rounded-full" />
+        <Image src={user.picture} alt="プロフィール画像" width={64} height={64} className="rounded-full" unoptimized />
         <div>
           <p className="font-bold">{user.name} さんでログイン中</p>
           <p className="text-sm text-gray-600">LINE ID: {user.sub}</p>

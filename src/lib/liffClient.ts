@@ -3,10 +3,13 @@
 
 import liff from '@line/liff';
 
+let liffInitialized = false;
+
 export const initLiff = async () => {
   try {
-    if (!liff.isInitialized) {
+    if (!liffInitialized) {
       await liff.init({ liffId: process.env.NEXT_PUBLIC_LIFF_ID! });
+      liffInitialized = true;
     }
   } catch (error) {
     console.error('LIFF init failed', error);

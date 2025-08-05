@@ -5,8 +5,11 @@ import FormCard from '@/components/FormCard';
 import UserInfo from '@/components/UserInfo';
 import { useRouter } from 'next/navigation';
 
+type LineUser = {
+  sub: string;
+};
+
 export default function FormPage() {
-  const [user, setUser] = useState<any>(null);
   const [lineId, setLineId] = useState<string | null>(null);
   const router = useRouter();
 
@@ -33,21 +36,19 @@ export default function FormPage() {
     },
   ];
 
-  // LINEログインが未完了ならログインページへ
   useEffect(() => {
     const stored = sessionStorage.getItem('lineUser');
     if (!stored) {
       router.push('/login');
     }
-  }, []);
+  }, [router]); // ← routerを依存に追加
 
   return (
     <main className="container mx-auto px-4 py-10">
       <h1 className="text-3xl font-bold mb-6">提出フォーム一覧</h1>
 
       <UserInfo
-        onReady={(userData) => {
-          setUser(userData);
+        onReady={(userData: LineUser) => {
           setLineId(userData.sub);
         }}
       />
