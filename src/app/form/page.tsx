@@ -3,13 +3,9 @@ import { redirect } from 'next/navigation';
 import FormCard from '@/components/FormCard';
 import UserInfo from '@/components/UserInfo';
 
-type LineUser = {
-  sub: string;
-};
-
 export default function FormPage() {
   const cookieStore = cookies();
-  const lineId = cookieStore.get('lineId')?.value;
+  const lineId = cookieStore.get('lineId')?.value ?? null;
 
   if (!lineId) {
     redirect('/login');
@@ -43,7 +39,7 @@ export default function FormPage() {
       <h1 className="text-3xl font-bold mb-6">提出フォーム一覧</h1>
 
       <UserInfo
-        onReady={(userData: LineUser) => {
+        onReady={() => {
           // サーバー側でCookie取得済みのため、何もしなくてOK
         }}
       />
