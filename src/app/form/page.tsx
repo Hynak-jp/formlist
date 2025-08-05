@@ -7,6 +7,8 @@ export default async function FormPage() {
   const cookieStore = await cookies(); // ✅ await をつける
   const lineId = cookieStore.get('lineId')?.value ?? null;
 
+  console.log('🟢 lineId from cookie:', lineId);
+
   if (!lineId) {
     redirect('/login'); // 未ログインならログイン画面へ
     return null;
