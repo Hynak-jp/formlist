@@ -9,6 +9,7 @@ export default async function FormPage() {
 
   if (!lineId) {
     redirect('/login'); // 未ログインならログイン画面へ
+    return null;
   }
 
   const forms = [
