@@ -5,7 +5,7 @@ import liff from '@line/liff';
 import Image from 'next/image';
 
 type Props = {
-  onReady: (userData: { name: string; picture: string; sub: string }) => void;
+  onReady?: (userData: { name: string; picture: string; sub: string }) => void;
 };
 
 export default function UserInfo({ onReady }: Props) {
@@ -18,7 +18,7 @@ export default function UserInfo({ onReady }: Props) {
 
         if (!liff.isLoggedIn()) {
           console.log('Not logged in: triggering liff.login()');
-          liff.login(); // ← ここが呼ばれれば遷移する
+          liff.login();
         } else {
           const profile = await liff.getProfile();
           const idToken = liff.getDecodedIDToken();
@@ -29,7 +29,7 @@ export default function UserInfo({ onReady }: Props) {
           };
           sessionStorage.setItem('lineUser', JSON.stringify(userData));
           setUser(userData);
-          onReady(userData);
+          onReady?.(userData); // ← ✅ オプショナル呼び出しに変更
 
           // ✅ Cookie保存APIを呼ぶ
           await fetch('/api/set-login-cookie', {
@@ -49,9 +49,9 @@ export default function UserInfo({ onReady }: Props) {
     if (stored) {
       const parsed = JSON.parse(stored);
       setUser(parsed);
-      onReady(parsed);
+      onReady?.(parsed); // ← ✅ 安全に呼び出し
     } else {
-      initLiff(); // ← ここが呼ばれないパターンがある
+      initLiff();
     }
   }, [onReady]);
 
