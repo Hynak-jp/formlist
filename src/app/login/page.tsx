@@ -39,7 +39,7 @@ export default function LoginPage() {
       }
     };
     init();
-  }, []);
+  }, [router]);
 
   const handleLogin = () => {
     if (!agreed) return;

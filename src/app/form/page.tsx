@@ -3,12 +3,12 @@ import { redirect } from 'next/navigation';
 import FormCard from '@/components/FormCard';
 import UserInfo from '@/components/UserInfo';
 
-export default function FormPage() {
-  const cookieStore = cookies(); // ✅ キャスト不要
+export default async function FormPage() {
+  const cookieStore = await cookies(); // ✅ await をつける
   const lineId = cookieStore.get('lineId')?.value ?? null;
 
   if (!lineId) {
-    redirect('/login');
+    redirect('/login'); // 未ログインならログイン画面へ
   }
 
   const forms = [
@@ -38,11 +38,7 @@ export default function FormPage() {
     <main className="container mx-auto px-4 py-10">
       <h1 className="text-3xl font-bold mb-6">提出フォーム一覧</h1>
 
-      <UserInfo
-        onReady={() => {
-          // Cookieはサーバー側で取得済みのため何も不要
-        }}
-      />
+      <UserInfo onReady={() => {}} />
 
       <div className="grid gap-6 md:grid-cols-2">
         {forms.map((form) => (
