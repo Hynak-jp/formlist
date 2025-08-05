@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import FormCard from '@/components/FormCard';
 import UserInfo from '@/components/UserInfo';
 
-export default async function FormPage() {
+export default function FormPage() {
   const cookieStore = cookies();
   const lineId = cookieStore.get('lineId')?.value ?? null;
 
