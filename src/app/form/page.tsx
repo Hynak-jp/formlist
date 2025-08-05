@@ -1,17 +1,19 @@
-'use client';
-
-import { useEffect, useState } from 'react';
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 import FormCard from '@/components/FormCard';
 import UserInfo from '@/components/UserInfo';
-import { useRouter } from 'next/navigation';
 
 type LineUser = {
   sub: string;
 };
 
 export default function FormPage() {
-  const [lineId, setLineId] = useState<string | null>(null);
-  const router = useRouter();
+  const cookieStore = cookies();
+  const lineId = cookieStore.get('lineId')?.value;
+
+  if (!lineId) {
+    redirect('/login');
+  }
 
   const forms = [
     {
@@ -36,30 +38,21 @@ export default function FormPage() {
     },
   ];
 
-  useEffect(() => {
-    const stored = sessionStorage.getItem('lineUser');
-    if (!stored) {
-      router.push('/login');
-    }
-  }, [router]); // ← routerを依存に追加
-
   return (
     <main className="container mx-auto px-4 py-10">
       <h1 className="text-3xl font-bold mb-6">提出フォーム一覧</h1>
 
       <UserInfo
         onReady={(userData: LineUser) => {
-          setLineId(userData.sub);
+          // サーバー側でCookie取得済みのため、何もしなくてOK
         }}
       />
 
-      {lineId && (
-        <div className="grid gap-6 md:grid-cols-2">
-          {forms.map((form) => (
-            <FormCard key={form.title} title={form.title} description={form.description} baseUrl={form.baseUrl} lineId={lineId} />
-          ))}
-        </div>
-      )}
+      <div className="grid gap-6 md:grid-cols-2">
+        {forms.map((form) => (
+          <FormCard key={form.title} title={form.title} description={form.description} baseUrl={form.baseUrl} lineId={lineId!} />
+        ))}
+      </div>
     </main>
   );
 }

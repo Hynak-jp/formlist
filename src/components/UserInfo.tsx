@@ -29,6 +29,15 @@ export default function UserInfo({ onReady }: Props) {
           sessionStorage.setItem('lineUser', JSON.stringify(userData));
           setUser(userData);
           onReady(userData);
+
+          // 追加: fetchでCookieをサーバー側に保存
+          await fetch('/api/set-login-cookie', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ lineId: userData.sub }),
+          });
         }
       } catch (e) {
         console.error('LIFF init error', e);
@@ -43,7 +52,7 @@ export default function UserInfo({ onReady }: Props) {
     } else {
       initLiff();
     }
-  }, []);
+  }, [onReady]);
 
   const handleLogout = () => {
     liff.logout();
