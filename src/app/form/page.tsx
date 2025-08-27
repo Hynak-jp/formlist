@@ -45,7 +45,13 @@ export default async function FormPage() {
 
       <div className="grid gap-6 md:grid-cols-2">
         {forms.map((form) => (
-          <FormCard key={form.title} title={form.title} description={form.description} baseUrl={form.baseUrl} lineId={lineId!} />
+          <FormCard
+            key={form.title}
+            title={form.title}
+            description={form.description}
+            baseUrl={form.baseUrl}
+            lineId={lineId!}
+          />
         ))}
       </div>
     </main>
