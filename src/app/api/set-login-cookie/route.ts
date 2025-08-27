@@ -1,3 +1,4 @@
+// src/app/api/set-login-cookie/route.ts
 import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
@@ -5,7 +6,13 @@ export async function POST(request: Request) {
 
   const response = NextResponse.json({ success: true });
 
-  response.headers.append('Set-Cookie', `lineId=${lineId}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${60 * 60 * 24 * 7}`);
+  // ✅ dev(http)では Secure 付けない。本番(https)では付ける
+  const secure = process.env.NODE_ENV === 'production' ? 'Secure; ' : '';
+  // ✅ Path は必ず '/' に
+  response.headers.append(
+    'Set-Cookie',
+    `lineId=${encodeURIComponent(lineId)}; Path=/; HttpOnly; ${secure}SameSite=Lax; Max-Age=${60 * 60 * 24 * 7}`
+  );
 
   return response;
 }
