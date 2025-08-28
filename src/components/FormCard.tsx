@@ -14,8 +14,10 @@ type Props = {
 export default function FormCard({ formId, title, description, baseUrl, lineId }: Props) {
   const store = makeProgressStore(lineId)();
   const status: FormStatus = store.statusByForm[formId] || 'not_started';
-
-  const href = `${baseUrl}?lineId=${encodeURIComponent(lineId)}&formId=${encodeURIComponent(formId)}&redirectUrl=${encodeURIComponent('https://formlist.vercel.app/done?formId=' + formId)}`;
+  // LIFFの仕様上、URLに改行やスペースが入るとエラーになるため、encodeURIComponentでエンコードする
+  // redirectUrl は送信後に戻ってくるURL（ここでは完了ページに戻す）
+  // formId も渡しておくと、完了ページでどのフォームが送信されたか分かる
+  const href = `${baseUrl}?line_id[0]=${encodeURIComponent(lineId)}&formId=${encodeURIComponent(formId)}&redirectUrl=${encodeURIComponent('https://formlist.vercel.app/done?formId=' + formId)}`;
 
   const label =
     status === 'done' ? '（送信済み）' : status === 'in_progress' ? '（入力中）' : '（未入力）';

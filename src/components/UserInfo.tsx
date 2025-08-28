@@ -55,9 +55,15 @@ export default function UserInfo({ onReady }: Props) {
     }
   }, [onReady]);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    // LIFFセッション削除
     liff.logout();
     sessionStorage.removeItem('lineUser');
+
+    // サーバーCookie削除
+    await fetch('/api/logout', { method: 'POST' });
+
+    // 強制的にログイン画面へ
     location.href = '/login';
   };
 
@@ -66,13 +72,23 @@ export default function UserInfo({ onReady }: Props) {
   return (
     <div className="mb-6 p-4 border rounded shadow-sm bg-white">
       <div className="flex items-center gap-4 mb-2">
-        <Image src={user.picture} alt="プロフィール画像" width={64} height={64} className="rounded-full" unoptimized />
+        <Image
+          src={user.picture}
+          alt="プロフィール画像"
+          width={64}
+          height={64}
+          className="rounded-full"
+          unoptimized
+        />
         <div>
           <p className="font-bold">{user.name} さんでログイン中</p>
           <p className="text-sm text-gray-600">LINE ID: {user.sub}</p>
         </div>
       </div>
-      <button onClick={handleLogout} className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
+      <button
+        onClick={handleLogout}
+        className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+      >
         ログアウト
       </button>
     </div>
