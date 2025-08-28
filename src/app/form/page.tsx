@@ -37,10 +37,10 @@ export default async function FormPage() {
       baseUrl: 'https://business.form-mailer.jp/lp/47a7602b302516',
     },
     {
-      formId: '302516-4',
-      title: '添付書類アップロード',
-      description: '各種証明書等をアップロードします',
-      baseUrl: 'https://business.form-mailer.jp/lp/47a7602b302516',
+      formId: '307065',
+      title: '書類提出フォーム',
+      description: '給与明細、家計収支などの書類をアップロードします',
+      baseUrl: 'https://business.form-mailer.jp/fms/0f10ce9b307065',
     },
   ];
 
