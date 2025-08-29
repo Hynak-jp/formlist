@@ -1,26 +1,20 @@
+// src/app/form/page.tsx
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { getServerSession, type Session } from 'next-auth';
-import { authOptions } from '@/lib/auth';
-
 import UserInfo from '@/components/UserInfo';
 import FormProgressClient from '@/components/FormProgressClient';
-import Link from "next/link";
 
-// NextAuthのSessionに lineId を“拡張”した型
-type BASession = Session & { lineId?: string | null };
+// SSR で毎回ガード
+export const dynamic = 'force-dynamic';
+export const fetchCache = 'force-no-store';
 
 export default async function FormPage() {
-  // 1) NextAuth セッションを最優先
-  const session = (await getServerSession(authOptions)) as BASession | null;
-  const lineIdFromSession = session?.lineId ?? null;
-
-  // 2) 旧cookie(lineId)でフォールバック（移行中だけ）
   const cookieStore = await cookies();
-  const lineIdFromCookie = cookieStore.get('lineId')?.value ?? null;
+  const lineId = cookieStore.get('lineId')?.value ?? null;
 
-  const lineId = lineIdFromSession || lineIdFromCookie;
-  if (!lineId) redirect('/login');
+  if (!lineId) {
+    redirect('/login');
+  }
 
   // ← 必要なフォームをここで定義（formId を必ず付ける）
   const forms = [
@@ -53,20 +47,8 @@ export default async function FormPage() {
   return (
     <main className="container mx-auto px-4 py-10">
       <h1 className="text-3xl font-bold mb-6">提出フォーム一覧</h1>
-
       <UserInfo />
-
       <FormProgressClient lineId={lineId!} forms={forms} />
-
-      <div className="mt-8">
-        {/* NextAuth標準のログアウト */}
-        <Link
-          className="inline-block rounded px-3 py-2 border"
-          href="/api/auth/signout?callbackUrl=/login"
-        >
-          ログアウト
-        </Link>
-      </div>
     </main>
   );
 }
