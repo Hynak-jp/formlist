@@ -1,20 +1,13 @@
-import { Suspense } from 'react';
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
-import LoginClient from './LoginClient';
-
-export default async function LoginPage() {
-  // ✅ サーバー側でCookie確認
-  const store = await cookies();
-  const lineId = store.get('lineId')?.value;
-  if (lineId) {
-    // すでにログイン済みなら即 /form へ
-    redirect('/form');
-  }
-
+export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="p-6">読み込み中…</div>}>
-      <LoginClient />
-    </Suspense>
+    <main className="p-6">
+      <h1 className="text-xl mb-4">ログイン</h1>
+      <a
+        className="inline-block rounded px-4 py-2 border"
+        href="/api/auth/signin/line?callbackUrl=/form"
+      >
+        LINEでログイン
+      </a>
+    </main>
   );
 }
