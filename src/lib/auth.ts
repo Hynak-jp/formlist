@@ -1,28 +1,41 @@
-import { NextAuthOptions } from "next-auth";
+import { NextAuthOptions, type Session } from "next-auth";
 import LineProvider from "next-auth/providers/line";
+import type { JWT } from "next-auth/jwt";
+
+type MyJWT = JWT & { lineId?: string; picture?: string };
+type LineProfile = Partial<{
+  sub: string;
+  userId: string;
+  name: string;
+  displayName: string;
+  picture: string;
+  pictureUrl: string;
+}>;
 
 export const authOptions: NextAuthOptions = {
   providers: [
     LineProvider({
       clientId: process.env.LINE_CLIENT_ID!,
       clientSecret: process.env.LINE_CLIENT_SECRET!,
-      // authorization: { params: { scope: "profile openid email" } }, // email要るなら
     }),
   ],
   session: { strategy: "jwt" },
   callbacks: {
-    async jwt({ token, account, profile }) {
-      const p: any = profile || {};
+    async jwt({ token, account, profile }): Promise<MyJWT> {
+      const p = (profile ?? {}) as LineProfile;
+      const t = token as MyJWT;
+
       if (account) {
-        token.lineId = p.sub || p.userId || token.lineId;
-        token.name = token.name || p.name || p.displayName || token.name;
-        token.picture = token.picture || p.picture || p.pictureUrl;
+        t.lineId = p.sub || p.userId || t.lineId;
+        if (!t.name) t.name = p.name || p.displayName || t.name;
+        t.picture = t.picture || p.picture || p.pictureUrl;
       }
-      return token;
+      return t;
     },
     async session({ session, token }) {
-      (session as any).lineId = (token as any).lineId;
-      if (session.user && token.picture) session.user.image = token.picture as string;
+      const t = token as MyJWT;
+      (session as Session & { lineId?: string }).lineId = t.lineId;
+      if (session.user && t.picture) session.user.image = t.picture;
       return session;
     },
   },

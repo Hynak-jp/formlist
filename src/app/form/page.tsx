@@ -5,6 +5,7 @@ import { authOptions } from '@/lib/auth';
 
 import UserInfo from '@/components/UserInfo';
 import FormProgressClient from '@/components/FormProgressClient';
+import Link from "next/link";
 
 // NextAuthのSessionに lineId を“拡張”した型
 type BASession = Session & { lineId?: string | null };
@@ -59,12 +60,12 @@ export default async function FormPage() {
 
       <div className="mt-8">
         {/* NextAuth標準のログアウト */}
-        <a
+        <Link
           className="inline-block rounded px-3 py-2 border"
           href="/api/auth/signout?callbackUrl=/login"
         >
           ログアウト
-        </a>
+        </Link>
       </div>
     </main>
   );
