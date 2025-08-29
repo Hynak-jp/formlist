@@ -49,8 +49,13 @@ export default function LoginClient() {
     setLoading(true);
     setErrorMsg(null);
     try {
-      if (!liff.isLoggedIn()) await liff.login();
-      else await bridgeAndGo();
+      if (!liff.isLoggedIn()) {
+        liff.login({
+          redirectUri: `${location.origin}/login?redirect=${encodeURIComponent(redirectTo)}`,
+        });
+        return;
+      }
+      await bridgeAndGo();
     } catch (e) {
       console.error(e);
       setErrorMsg('ログインに失敗しました。もう一度お試しください。');
