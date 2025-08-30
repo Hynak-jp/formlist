@@ -5,7 +5,7 @@ declare module 'next-auth' {
   interface Session {
     lineId?: string;
     user?: DefaultSession['user'] & {
-      image?: string | null;
+      image?: string;
     };
   }
 }

@@ -23,26 +23,23 @@ export const authOptions: NextAuthOptions = {
   ],
   session: { strategy: 'jwt' },
   callbacks: {
-    async jwt({ token, account, profile }) {
-      // JWT型は next-auth.d.ts で拡張済み（token.lineId / token.picture が使える）
+    async jwt({ token, profile }) {
       const p = (profile ?? {}) as LineProfile;
 
-      if (account) {
-        token.lineId = p.sub ?? p.userId ?? token.lineId;
-        if (!token.name && (p.name || p.displayName)) {
-          token.name = p.name ?? p.displayName;
-        }
-        if (!token.picture && (p.picture || p.pictureUrl)) {
-          token.picture = p.picture ?? p.pictureUrl;
-        }
-      }
+      if (p.sub) token.lineId = p.sub;
+      if (p.name) token.name = p.name;
+
+      const pic = p.picture ?? p.pictureUrl;
+      if (pic) token.picture = pic;
+
       return token;
     },
     async session({ session, token }) {
-      // Session も拡張済み（session.lineId が使える）
-      session.lineId = token.lineId;
-      if (session.user && token.picture) {
-        session.user.image = token.picture;
+      session.lineId = token.lineId ?? undefined;
+
+      if (session.user) {
+        if (token.name) session.user.name = String(token.name);
+        if (token.picture) session.user.image = String(token.picture);
       }
       return session;
     },
