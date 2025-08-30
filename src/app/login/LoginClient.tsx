@@ -9,7 +9,6 @@ export default function LoginClient() {
 
   const handleLogin = () => {
     startTransition(() => {
-      // NextAuth: LINE プロバイダでログイン → /form へ戻る
       signIn('line', { callbackUrl: '/form' });
     });
   };
@@ -43,12 +42,6 @@ export default function LoginClient() {
       >
         {pending ? 'リダイレクト中…' : 'LINEでログイン'}
       </button>
-
-      {/* JS無効時のフォールバック */}
-      {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
-      <noscript>
-        <a href="/api/auth/signin/line?callbackUrl=/form">LINEでログイン</a>
-      </noscript>
     </main>
   );
 }
