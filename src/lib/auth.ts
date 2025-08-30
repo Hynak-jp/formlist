@@ -1,5 +1,5 @@
 // src/lib/auth.ts
-import type { NextAuthOptions, Session } from 'next-auth';
+import type { NextAuthOptions } from 'next-auth';
 import LineProvider from 'next-auth/providers/line';
 
 // LINE プロファイルの想定キーだけ拾って型定義
