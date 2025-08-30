@@ -1,20 +1,17 @@
-// src/app/form/page.tsx
-import { cookies } from 'next/headers';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import UserInfo from '@/components/UserInfo';
 import FormProgressClient from '@/components/FormProgressClient';
 
-// SSR で毎回ガード
 export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
 
 export default async function FormPage() {
-  const cookieStore = await cookies();
-  const lineId = cookieStore.get('lineId')?.value ?? null;
+  const session = await getServerSession(authOptions);
+  const lineId = session?.lineId ?? null;
 
-  if (!lineId) {
-    redirect('/login');
-  }
+  if (!lineId) redirect('/login');
 
   // ← 必要なフォームをここで定義（formId を必ず付ける）
   const forms = [

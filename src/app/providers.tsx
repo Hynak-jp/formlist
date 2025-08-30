@@ -1,6 +1,6 @@
 'use client';
-// 一旦、next-auth の import は外す
+import { SessionProvider } from 'next-auth/react';
 
 export default function Providers({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+  return <SessionProvider>{children}</SessionProvider>;
 }
