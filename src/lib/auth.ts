@@ -1,15 +1,16 @@
 // src/lib/auth.ts
 import type { NextAuthOptions } from 'next-auth';
+import type { JWT } from 'next-auth/jwt';
 import LineProvider from 'next-auth/providers/line';
 
-// LINE プロファイルの想定キーだけ拾って型定義
+// LINEから返りうるプロファイルを型で定義
 type LineProfile = {
-  sub?: string; // OIDC subject（ユーザーID）
-  userId?: string; // 互換用
+  sub?: string; // OIDC subject
+  userId?: string; // 互換
   name?: string;
-  displayName?: string; // 互換用
+  displayName?: string; // 互換
   picture?: string;
-  pictureUrl?: string; // 互換用
+  pictureUrl?: string; // 互換
 };
 
 export const authOptions: NextAuthOptions = {
@@ -19,31 +20,50 @@ export const authOptions: NextAuthOptions = {
       clientSecret: process.env.LINE_CLIENT_SECRET!,
       authorization: { params: { scope: 'openid profile' } },
       checks: ['pkce', 'state'],
+
+      // ← any を使わず LineProfile にキャスト
+      profile(profileRaw) {
+        const p = profileRaw as LineProfile;
+        return {
+          id: p.sub ?? p.userId ?? '',
+          name: p.name ?? p.displayName ?? '',
+          email: null,
+          image: p.picture ?? p.pictureUrl ?? null,
+        };
+      },
     }),
   ],
+
   session: { strategy: 'jwt' },
+
   callbacks: {
     async jwt({ token, profile }) {
-      const p = (profile ?? {}) as LineProfile;
+      // token は拡張済み JWT 型として扱える
+      const t = token as JWT;
+      const p = profile as LineProfile | undefined;
 
-      if (p.sub) token.lineId = p.sub;
-      if (p.name) token.name = p.name;
+      if (p?.sub) t.lineId = p.sub;
+      if (p?.name ?? p?.displayName) t.name = p?.name ?? p?.displayName ?? null;
 
-      const pic = p.picture ?? p.pictureUrl;
-      if (pic) token.picture = pic;
+      const pic = p?.picture ?? p?.pictureUrl;
+      if (pic) t.picture = pic;
 
-      return token;
+      return t;
     },
+
     async session({ session, token }) {
-      session.lineId = token.lineId ?? undefined;
+      const t = token as JWT;
+
+      session.lineId = t.lineId ?? undefined;
 
       if (session.user) {
-        if (token.name) session.user.name = String(token.name);
-        if (token.picture) session.user.image = String(token.picture);
+        if (t.name !== undefined) session.user.name = t.name ?? session.user.name ?? null;
+        if (!session.user.image && t.picture) session.user.image = t.picture;
       }
       return session;
     },
   },
+
   pages: {
     signIn: '/login',
   },
