@@ -2,41 +2,40 @@
 
 import Image from 'next/image';
 import { useSession, signOut } from 'next-auth/react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 export default function UserInfo() {
   const { data: session, status } = useSession();
   const [imgErr, setImgErr] = useState(false);
 
-  const name = session?.user?.name ?? 'ログイン中';
-  const lineId = session?.lineId;
+  const raw = session?.user?.image ? String(session.user.image) : '';
+  const proxied = useMemo(() => (raw ? `/api/avatar?url=${encodeURIComponent(raw)}` : ''), [raw]);
 
-  // 認証済みかつエラーなしなら LINE の画像URL、それ以外はローカルのフォールバック
-  const picture =
-    status === 'authenticated' && !imgErr && session?.user?.image
-      ? session.user.image
-      : '/avatar-fallback.svg';
+  const showAvatar = status === 'authenticated' && !!proxied && !imgErr;
 
   return (
     <div className="flex items-center justify-between p-4 mb-6 rounded bg-gray-50">
       <div className="flex items-center gap-3">
-        <Image
-          key={picture} // 画像URLが変わったときに再描画されるように
-          src={picture}
-          alt="avatar"
-          width={40}
-          height={40}
-          className="rounded-full"
-          onError={() => setImgErr(true)}
-          referrerPolicy="no-referrer"
-          // ※ unoptimized は動作確認用。remotePatternsが効いていれば外してOK
-          unoptimized
-        />
+        {showAvatar ? (
+          <Image
+            key={proxied}
+            src={proxied}
+            alt="avatar"
+            width={40}
+            height={40}
+            className="rounded-full"
+            onError={() => setImgErr(true)}
+          />
+        ) : (
+          // セッション確定前やエラー時は簡易プレースホルダ（※フォールバック画像は出さない）
+          <div className="w-10 h-10 rounded-full bg-gray-200" />
+        )}
         <div>
-          <p className="font-bold">{name} さんでログイン中</p>
-          {lineId && <p className="text-sm text-gray-600">LINE ID: {lineId}</p>}
+          <p className="font-bold">{session?.user?.name ?? 'ログイン中'} さんでログイン中</p>
+          {session?.lineId && <p className="text-sm text-gray-600">LINE ID: {session.lineId}</p>}
         </div>
       </div>
+
       {status === 'authenticated' && (
         <button
           onClick={() => signOut({ callbackUrl: '/login' })}
