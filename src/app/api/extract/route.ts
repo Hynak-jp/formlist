@@ -90,32 +90,31 @@ function normalizePaySlip(json: PaySlip): PaySlip {
   }
 
   // 3) 金額系を整数に（文字列で来た場合の保険）
+  // 数値変換ヘルパーはそのまま
   const toInt = (v: unknown): number | undefined => {
-    if (v == null) return undefined; // null/undefinedならそのまま
+    if (v == null) return undefined;
     if (typeof v === 'number' && Number.isFinite(v)) return v | 0;
     if (typeof v === 'string') {
       const s = v.replace(/[^\d-]/g, '');
-      if (s === '') return undefined;
+      if (!s) return undefined;
       const n = parseInt(s, 10);
       return Number.isFinite(n) ? n : undefined;
     }
     return undefined;
   };
 
-  // プロパティ代入
-  if (json.gross_amount != null) {
-    json.gross_amount = toInt(json.gross_amount);
-  }
-  if (json.deductions_total != null) {
-    json.deductions_total = toInt(json.deductions_total);
-  }
+  json.gross_amount = toInt(json.gross_amount);
+  json.deductions_total = toInt(json.deductions_total);
   json.net_amount = toInt(json.net_amount);
 
+  // ← ここをガード付きに
   if (Array.isArray(json.items)) {
     json.items = json.items.map((it) => ({
       label: (it?.label ?? '').toString(),
       amount: toInt(it?.amount) ?? 0, // 必ず number
     }));
+  } else {
+    json.items = []; // 型が items: Array<...> | undefined なら空配列で統一
   }
 
   return json;
