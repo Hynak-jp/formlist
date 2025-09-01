@@ -17,7 +17,7 @@ export default function UserInfo() {
     <div className="flex items-center justify-between p-4 mb-6 rounded bg-gray-50">
       <div className="flex items-center gap-3">
         <Image
-          src={picture}
+          src={picture || '/avatar-fallback.png'}
           alt="avatar"
           width={40}
           height={40}
