@@ -20,8 +20,8 @@ export async function POST(req: NextRequest) {
     });
     const data = await r.json();
     return r.ok ? NextResponse.json(data) : NextResponse.json(data, { status: 500 });
-  } catch (e: any) {
-    return NextResponse.json({ error: String(e?.message || e) }, { status: 500 });
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : String(e);
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
-

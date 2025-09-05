@@ -18,7 +18,6 @@ export default function FormProgressClient({ lineId, displayName, forms }: Props
 
   // Bootstrap on first render (client), redundant with server prefetch but safe
   // Stores nothing globally yet; ensures endpoint works per 2-2.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   React.useEffect(() => {
     (async () => {
       try {
@@ -27,7 +26,7 @@ export default function FormProgressClient({ lineId, displayName, forms }: Props
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ lineId, displayName }),
         });
-      } catch (_) {}
+      } catch {}
     })();
   }, [lineId, displayName]);
 
