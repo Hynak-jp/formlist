@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import ProgressBar from './ProgressBar';
 import ResetProgressButton from './ResetProgressButton';
 import { makeProgressStore } from '@/lib/progressStore';
@@ -7,12 +8,28 @@ import FormCard from './FormCard';
 
 type Props = {
   lineId: string;
-  forms: Array<{ formId: string; title: string; description: string; baseUrl: string }>;
+  displayName?: string;
+  forms: Array<{ formId: string; title: string; description: string; baseUrl: string; href?: string }>;
 };
 
-export default function FormProgressClient({ lineId, forms }: Props) {
+export default function FormProgressClient({ lineId, displayName, forms }: Props) {
   const store = makeProgressStore(lineId)();
   const doneCount = forms.filter((f) => store.statusByForm[f.formId] === 'done').length;
+
+  // Bootstrap on first render (client), redundant with server prefetch but safe
+  // Stores nothing globally yet; ensures endpoint works per 2-2.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  React.useEffect(() => {
+    (async () => {
+      try {
+        await fetch('/api/bootstrap', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ lineId, displayName }),
+        });
+      } catch (_) {}
+    })();
+  }, [lineId, displayName]);
 
   return (
     <>
@@ -25,6 +42,7 @@ export default function FormProgressClient({ lineId, forms }: Props) {
             title={form.title}
             description={form.description}
             baseUrl={form.baseUrl}
+            href={form.href}
             lineId={lineId}
           />
         ))}

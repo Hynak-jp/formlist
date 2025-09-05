@@ -3,6 +3,8 @@ import { authOptions } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import UserInfo from '@/components/UserInfo';
 import FormProgressClient from '@/components/FormProgressClient';
+import { makeFormUrl } from '@/lib/formUrl';
+import crypto from 'crypto';
 
 export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
@@ -10,6 +12,7 @@ export const fetchCache = 'force-no-store';
 export default async function FormPage() {
   const session = await getServerSession(authOptions);
   const lineId = session?.lineId ?? null;
+  const displayName = session?.user?.name ?? '';
 
   if (!lineId) redirect('/login');
 
@@ -41,11 +44,33 @@ export default async function FormPage() {
     },
   ];
 
+  // Server-side bootstrap to get activeCaseId for link signing
+  const GAS_ENDPOINT = process.env.GAS_ENDPOINT!;
+  const SECRET = process.env.BOOTSTRAP_SECRET!;
+  const ts = Date.now().toString();
+  const sig = crypto.createHmac('sha256', SECRET).update(`${lineId}|${ts}`).digest('hex');
+  const r = await fetch(GAS_ENDPOINT, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ lineId, displayName, ts, sig }),
+    cache: 'no-store',
+  });
+  let activeCaseId = '';
+  if (r.ok) {
+    const data = (await r.json()) as { activeCaseId?: string };
+    activeCaseId = data?.activeCaseId || '';
+  }
+
+  const formsWithHref = forms.map((f) => ({
+    ...f,
+    href: makeFormUrl(f.baseUrl, lineId!, activeCaseId || '0001'),
+  }));
+
   return (
     <main className="container mx-auto px-4 py-10">
       <h1 className="text-3xl font-bold mb-6">提出フォーム一覧</h1>
       <UserInfo />
-      <FormProgressClient lineId={lineId!} forms={forms} />
+      <FormProgressClient lineId={lineId!} displayName={displayName} forms={formsWithHref} />
     </main>
   );
 }
