@@ -4,20 +4,19 @@ import { redirect } from 'next/navigation';
 import UserInfo from '@/components/UserInfo';
 import FormProgressClient from '@/components/FormProgressClient';
 import { makeFormUrl } from '@/lib/formUrl';
-import crypto from 'crypto';
+import { headers } from 'next/headers';
+// headers は不要。内部 API には相対パスで十分。
 
+// サーバー動作の安定化（SSRで毎回取得）
 export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
+export const runtime = 'nodejs';
 
-export default async function FormPage() {
-  const session = await getServerSession(authOptions);
-  const lineId = session?.lineId ?? null;
-  const displayName = session?.user?.name ?? '';
-
-  if (!lineId) redirect('/login');
-
-  // ← 必要なフォームをここで定義（formId を必ず付ける）
-  const forms = [
+// いまはAPIを叩かず、この関数内で定義した配列を返します。
+// ※将来 /api/forms を作るなら、この関数の中身を fetch に置換してください。
+type FormDef = { formId: string; title: string; description: string; baseUrl: string };
+async function loadForms(): Promise<{ forms: FormDef[] }> {
+  const forms: FormDef[] = [
     {
       formId: '302516',
       title: '破産者情報フォーム',
@@ -43,22 +42,37 @@ export default async function FormPage() {
       baseUrl: 'https://business.form-mailer.jp/fms/0f10ce9b307065',
     },
   ];
+  return { forms };
+}
 
-  // Server-side bootstrap to get activeCaseId for link signing
-  const GAS_ENDPOINT = process.env.GAS_ENDPOINT!;
-  const SECRET = process.env.BOOTSTRAP_SECRET!;
-  const ts = Date.now().toString();
-  const sig = crypto.createHmac('sha256', SECRET).update(`${lineId}|${ts}`).digest('hex');
-  const r = await fetch(GAS_ENDPOINT, {
+export default async function FormPage() {
+  const { forms } = await loadForms(); // ← ここで取得
+  const session = await getServerSession(authOptions);
+  const lineId = session?.lineId ?? null;
+  const displayName = session?.user?.name ?? '';
+
+  if (!lineId) redirect('/login');
+
+  // ← ここからは API 経由だけ。署名は API 側で実施。
+  // 絶対URLを優先（未設定時はヘッダから組み立て）
+  const h = await headers();
+  const baseUrl =
+    process.env.NEXT_PUBLIC_BASE_URL ||
+    `${h.get('x-forwarded-proto') ?? 'http'}://${h.get('host')}`;
+  const res = await fetch(`${baseUrl}/api/bootstrap`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ lineId, displayName, ts, sig }),
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ lineId, displayName }),
     cache: 'no-store',
   });
-  let activeCaseId = '';
-  if (r.ok) {
-    const data = (await r.json()) as { activeCaseId?: string };
-    activeCaseId = data?.activeCaseId || '';
+
+  let activeCaseId = '0001';
+  try {
+    const data = (await res.json()) as { activeCaseId?: string; ok?: boolean };
+    if (res.ok && data?.activeCaseId) activeCaseId = data.activeCaseId;
+  } catch {
+    // ログだけ残してフォールバック
+    console.error('bootstrap: non-JSON');
   }
 
   const formsWithHref = forms.map((f) => ({
