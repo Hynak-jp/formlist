@@ -19,26 +19,32 @@ async function loadForms(): Promise<{ forms: FormDef[] }> {
   const forms: FormDef[] = [
     {
       formId: '302516',
-      title: '破産者情報フォーム',
-      description: '収支や借金の内容を記入します',
+      title: 'はじめのフォーム（受付/インテーク）',
+      description: 'このフォームを一番初めに記入します',
       baseUrl: 'https://business.form-mailer.jp/lp/47a7602b302516',
     },
     {
-      formId: '302516-2',
-      title: '債権者一覧フォーム',
-      description: '借入先の情報を記入します',
+      formId: '308335',
+      title: 'S2002 破産手続開始申立書',
+      description: '破産手続開始申立書の情報を記入します',
+      baseUrl: 'https://business.form-mailer.jp/fms/d9b655cb308335',
+    },
+    {
+      formId: '308463',
+      title: 'S2005 債権者一覧表',
+      description: '債権者情報を記入します',
       baseUrl: 'https://business.form-mailer.jp/lp/47a7602b302516',
     },
     {
-      formId: '302516-3',
-      title: '収入・支出フォーム',
-      description: '家計の情報を記入します',
-      baseUrl: 'https://business.form-mailer.jp/lp/47a7602b302516',
+      formId: '308466',
+      title: 'S2011 家計収支提出フォーム',
+      description: '申立前２か月分の家計収支表を記入します',
+      baseUrl: 'https://business.form-mailer.jp/fms/0f10ce9b307065',
     },
     {
       formId: '307065',
       title: '書類提出フォーム',
-      description: '給与明細、家計収支などの書類をアップロードします',
+      description: '給与明細などの書類をアップロードします',
       baseUrl: 'https://business.form-mailer.jp/fms/0f10ce9b307065',
     },
   ];
