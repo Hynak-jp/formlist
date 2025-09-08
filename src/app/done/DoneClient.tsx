@@ -4,10 +4,11 @@ import { useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { makeProgressStore } from '@/lib/progressStore';
 
-export default function DoneClient({ lineId, form }: { lineId: string; form: string }) {
+export default function DoneClient({ lineId }: { lineId: string }) {
   const search = useSearchParams();
   const router = useRouter();
   const formId = search.get('formId') || 'unknown';
+  const form = search.get('form') || '';
 
   const store = makeProgressStore(lineId)();
 
