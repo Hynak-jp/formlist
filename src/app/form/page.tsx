@@ -76,7 +76,7 @@ export default async function FormPage() {
 
   if (!status?.hasIntake) {
     const intakeBase = process.env.NEXT_PUBLIC_INTAKE_FORM_URL!;
-    const url = makeIntakeUrl(intakeBase, lineId!, `${origin}/done?form=intake`);
+    const url = makeIntakeUrl(intakeBase, `${origin}/done?form=intake`);
     return (
       <main className="container mx-auto px-4 py-10">
         <h1 className="text-2xl font-semibold mb-4">まずは「受付フォーム」をご記入ください</h1>

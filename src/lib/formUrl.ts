@@ -17,17 +17,11 @@ export function makeFormUrl(baseUrl: string, lineId: string, caseId: string) {
 }
 
 // 受付フォーム: lineId|ts で署名（caseId なし）
-export function makeIntakeUrl(baseUrl: string, lineId: string, redirectUrl?: string) {
-  const ts = Math.floor(Date.now() / 1000); // 秒に統一
-  const secret = process.env.BOOTSTRAP_SECRET!;
-  const sig = crypto.createHmac('sha256', secret).update(`${lineId}|${ts}`, 'utf8').digest('hex');
-  const params = new URLSearchParams({
-    'line_id[0]': lineId,
-    ts: String(ts),
-    sig,
-  });
-  if (redirectUrl) params.set('redirect_url', redirectUrl);
-  return `${baseUrl}?${params.toString()}`;
+// 受付フォーム（公開URL）には個人識別子を載せない。redirect_url だけ付与。
+export function makeIntakeUrl(baseUrl: string, redirectUrl: string) {
+  const url = new URL(baseUrl);
+  url.searchParams.set('redirect_url', redirectUrl);
+  return url.toString();
 }
 // 署名対象: lineId|caseId|ts（formId は不要）
 // アルゴリズム: HMAC-SHA256, 出力は hex(64文字)
