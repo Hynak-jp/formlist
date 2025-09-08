@@ -13,19 +13,38 @@ export default function DoneClient({ lineId }: { lineId: string }) {
   const store = makeProgressStore(lineId)();
 
   useEffect(() => {
-    // 受付フォーム完了のときだけ、サーバー間で intake_complete を通知
-    if (form === 'intake') {
-      fetch('/api/intake/complete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lineId }),
-      }).catch(() => {});
-    }
-    // 送信完了を記録して一覧へ
-    store.setStatus(formId, 'done');
-    router.replace('/form');
+    (async () => {
+      const intakeFormId = process.env.NEXT_PUBLIC_INTAKE_FORM_ID;
+      const isIntake = form === 'intake' || (intakeFormId && formId === intakeFormId);
+
+      if (isIntake && lineId) {
+        try {
+          const r = await fetch('/api/intake/complete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ lineId }),
+            cache: 'no-store',
+          });
+          let data: any = null;
+          try { data = await r.json(); } catch {}
+          // eslint-disable-next-line no-console
+          console.log('intake_complete:', r.status, data);
+          if (r.ok && (data?.ok ?? true)) {
+            store.setStatus(formId, 'done');
+            router.replace('/form');
+            return;
+          }
+        } catch (e) {
+          // eslint-disable-next-line no-console
+          console.error('intake_complete error', e);
+        }
+      }
+      // フォールバック：受付以外 or 失敗時も一覧へ戻す
+      store.setStatus(formId, 'done');
+      router.replace('/form');
+    })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form, formId, lineId]);
 
-  return <p>送信ありがとうございました。フォーム一覧に戻れます。</p>;
+  return <p>送信ありがとうございました。処理が完了すると一覧に戻ります…</p>;
 }
