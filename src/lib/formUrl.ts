@@ -15,6 +15,20 @@ export function makeFormUrl(baseUrl: string, lineId: string, caseId: string) {
 
   return `${baseUrl}?${params.toString()}`;
 }
+
+// 受付フォーム: lineId|ts で署名（caseId なし）
+export function makeIntakeUrl(baseUrl: string, lineId: string, redirectUrl?: string) {
+  const ts = Math.floor(Date.now() / 1000); // 秒に統一
+  const secret = process.env.BOOTSTRAP_SECRET!;
+  const sig = crypto.createHmac('sha256', secret).update(`${lineId}|${ts}`, 'utf8').digest('hex');
+  const params = new URLSearchParams({
+    'line_id[0]': lineId,
+    ts: String(ts),
+    sig,
+  });
+  if (redirectUrl) params.set('redirect_url', redirectUrl);
+  return `${baseUrl}?${params.toString()}`;
+}
 // 署名対象: lineId|caseId|ts（formId は不要）
 // アルゴリズム: HMAC-SHA256, 出力は hex(64文字)
 // 秘密鍵: BOOTSTRAP_SECRET（環境変数）
