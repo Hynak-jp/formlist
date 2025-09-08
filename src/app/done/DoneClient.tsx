@@ -25,9 +25,8 @@ export default function DoneClient({ lineId }: { lineId: string }) {
             body: JSON.stringify({ lineId }),
             cache: 'no-store',
           });
-          let data: any = null;
-          try { data = await r.json(); } catch {}
-          // eslint-disable-next-line no-console
+          let data: { ok?: boolean } | null = null;
+          try { data = (await r.json()) as { ok?: boolean }; } catch {}
           console.log('intake_complete:', r.status, data);
           if (r.ok && (data?.ok ?? true)) {
             store.setStatus(formId, 'done');
@@ -35,7 +34,6 @@ export default function DoneClient({ lineId }: { lineId: string }) {
             return;
           }
         } catch (e) {
-          // eslint-disable-next-line no-console
           console.error('intake_complete error', e);
         }
       }
